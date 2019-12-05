@@ -32,7 +32,8 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+    
+#include <stdlib.h>
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -68,7 +69,7 @@ void Error_Handler(void);
 #define Led_Red_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 /*SHT20 设备操作相关宏定义，详见手册*/
-#define SHT20_ADDRESS  0X40
+#define SHT20_ADDRESS  0X80
 #define SHT20_Measurement_RH_HM  0XE5
 #define SHT20_Measurement_T_HM  0XE3
 #define SHT20_Measurement_RH_NHM  0XF5

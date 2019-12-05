@@ -12,10 +12,15 @@
 #include <stdio.h>
 
 extern float temperatureValue;
+extern float humidityValue;
 
-int8_t getTemperature(void);
+char getValue();
 
+char getTemperature(void);
+char getHumidity();
 char SHT2x_CheckCrc(char data[], char nbrOfBytes, char checksum);
 float SHT2x_CalcTemperatureC(uint16_t u16sT);
+float SHT2x_CalcRH(uint16_t u16sRH);
+void SHT20_reset(void);
 
 #endif /* TemperatureHumidity_h */

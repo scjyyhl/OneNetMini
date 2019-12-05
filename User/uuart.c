@@ -22,17 +22,21 @@
 
 void uprintf(const char *fmt,...) {
     va_list ap;
-    size_t pSize;
+    int16_t pSize;
     char printfBuf[MAX_LEN + 1] = {0};
     // format string
     va_start(ap, fmt);
-    pSize = vsnprintf((char *)printfBuf, MAX_LEN, fmt, ap);
+    pSize = vsnprintf(printfBuf, MAX_LEN, fmt, ap);
     va_end(ap);
+    if (pSize < 0) {
+        memcpy(printfBuf, "vsnprintf return -1", 19);
+        pSize = 19;
+    }
     // add new line char
     pSize = MIN(pSize, MAX_LEN);
     printfBuf[pSize++] = '\n';
     
-    HAL_UART_Transmit(&huart1, (uint8_t *)printfBuf, pSize, 10);
+    HAL_UART_Transmit(&huart1, (uint8_t *)printfBuf, pSize, 50);
 }
 
 void uprint(const char *msg) {

@@ -27,7 +27,6 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
 #include "led.h"
 #include "uuart.h"
 #include "TemperatureHumidity.h"
@@ -109,6 +108,7 @@ int main(void)
     sleep(1.1);
     LED_OFF;
     sleep(1);
+    SHT20_reset();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -119,8 +119,11 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
       ledTwinkle();
-//      getTemperature();
-//      uprintf("temperature is %f ", temperatureValue);
+      getValue();
+//      char fbuff[11] = {0};
+//      gcvtf(temperatureValue, 10, fbuff);
+//      uprintf("temperature is %s ", fbuff);
+      uprintf("temperature is %f, humidity is %f%%\n", temperatureValue, humidityValue);
   }
   /* USER CODE END 3 */
 }

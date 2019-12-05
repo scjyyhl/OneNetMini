@@ -30,6 +30,7 @@
 
 #include "led.h"
 #include "uuart.h"
+#include "TemperatureHumidity.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -117,7 +118,9 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-      runLedTwinkle();
+      ledTwinkle();
+//      getTemperature();
+//      uprintf("temperature is %f ", temperatureValue);
   }
   /* USER CODE END 3 */
 }

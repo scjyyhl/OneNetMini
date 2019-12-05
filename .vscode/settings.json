@@ -1,0 +1,13 @@
+{
+  "files.associations": {
+    "*.html": "html",
+    "*.vue": "vue",
+    "led.h": "c",
+    "main.h": "c",
+    "stm32f1xx_hal.h": "c",
+    "gpio.h": "c",
+    "uuart.h": "c",
+    "stm32f1xx_hal_uart.h": "c",
+    "stm32f103xb.h": "c"
+  }
+}

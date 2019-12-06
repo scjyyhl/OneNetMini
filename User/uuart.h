@@ -23,4 +23,9 @@ void uprintf(const char *fmt,...);
  * 通过串口输出，末尾不会自动加换行
  */
 void uprint(const char *msg);
+
+/**
+ * 通过串口输出，末尾会自动加换行
+ */
+void uprintln(const char *msg);
 #endif

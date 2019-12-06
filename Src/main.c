@@ -29,7 +29,7 @@
 /* USER CODE BEGIN Includes */
 #include "led.h"
 #include "uuart.h"
-#include "TemperatureHumidity.h"
+#include "SHT20.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/

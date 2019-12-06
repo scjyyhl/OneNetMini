@@ -64,7 +64,8 @@ User/uuart.c \
 Src/rtc.c \
 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rtc.c \
 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rtc_ex.c \
-User/TemperatureHumidity.c
+User/SHT20.c \
+User/ESP8266.c
 
 # ASM sources
 ASM_SOURCES =  \

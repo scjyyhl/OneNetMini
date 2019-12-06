@@ -1,12 +1,12 @@
 //
-//  TemperatureHumidity.c
+//  SHT20.c
 //  OneNetMini
 //
 //  Created by HaiLong Yang on 2019/12/4.
 //  Copyright © 2019 com.dragonlis. All rights reserved.
 //
 
-#include "TemperatureHumidity.h"
+#include "SHT20.h"
 #include "macro.h"
 #include "i2c.h"
 #include "uuart.h"

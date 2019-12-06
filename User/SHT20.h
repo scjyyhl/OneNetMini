@@ -1,13 +1,13 @@
 //
-//  TemperatureHumidity.h
+//  SHT20.h
 //  OneNetMini
 //
 //  Created by HaiLong Yang on 2019/12/4.
 //  Copyright © 2019 com.dragonlis. All rights reserved.
 //
 
-#ifndef TemperatureHumidity_h
-#define TemperatureHumidity_h
+#ifndef SHT20_h
+#define SHT20_h
 
 #include <stdio.h>
 
@@ -23,4 +23,4 @@ float SHT2x_CalcTemperatureC(uint16_t u16sT);
 float SHT2x_CalcRH(uint16_t u16sRH);
 void SHT20_reset(void);
 
-#endif /* TemperatureHumidity_h */
+#endif /* SHT20_h */

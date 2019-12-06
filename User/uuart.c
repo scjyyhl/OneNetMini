@@ -40,5 +40,16 @@ void uprintf(const char *fmt,...) {
 }
 
 void uprint(const char *msg) {
-    HAL_UART_Transmit(&huart1, (uint8_t *)msg, strlen(msg), 10);
+    HAL_UART_Transmit(&huart1, (uint8_t *)msg, strlen(msg), 100);
 }
+
+void uprintln(const char *msg) {
+    uint8_t *data;
+    uint16_t size = strlen(msg);
+    
+    data = malloc(size + 1);
+    memcpy(data, msg, size);
+    data[++size] = '\n';
+    HAL_UART_Transmit(&huart1, data, size, 100);
+}
+

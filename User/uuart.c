@@ -14,11 +14,18 @@
 #include "uuart.h"
 #include "usart.h"
 #include "macro.h"
+#include "stm32f103xb.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
 
-#define MAX_LEN 511
+#define MAX_LEN 512
+
+USART_RecvCallback usart1Callback;
+USART_RecvCallback usart2Callback;
+
+#define U1_BUF_SIZE   64
+unsigned char uart1_Buffer[U1_BUF_SIZE + 1];
 
 void uprintf(const char *fmt,...) {
     va_list ap;
@@ -49,7 +56,41 @@ void uprintln(const char *msg) {
     
     data = malloc(size + 1);
     memcpy(data, msg, size);
-    data[++size] = '\n';
+    data[size++] = '\n';
     HAL_UART_Transmit(&huart1, data, size, 100);
 }
 
+void uuart1_RecvInit(void) {
+//    HAL_StatusTypeDef status = HAL_UART_Receive_IT(&huart1, uart1_Buffer, 5);
+    HAL_StatusTypeDef status = HAL_UART_Receive_DMA(&huart1, uart1_Buffer, 5);
+    if (status != HAL_OK) {
+        uprintf("HAL_UART_Receive_IT uart1 error. status = %d ", status);
+    }
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+    if (huart->Instance == USART1) {
+        uprintln("HAL_UART_RxCpltCallback USART1");
+        uprintln((const char *)uart1_Buffer);
+        memset(uart1_Buffer, 0, U1_BUF_SIZE + 1);
+        uuart1_RecvInit();
+    }
+    else if (huart->Instance == USART2) {
+        uprintln("HAL_UART_RxCpltCallback USART2");
+        if (usart2Callback) {
+            usart2Callback();
+        }
+    }
+    else {
+        uprintln("HAL_UART_RxCpltCallback Other");
+    }
+}
+
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
+    if (huart->Instance == USART1) {
+        uprintln("HAL_UART_ErrorCallback USART1");
+        __HAL_UART_RESET_HANDLE_STATE(huart);
+        WRITE_REG(huart->Instance->SR, 0);
+        uuart1_RecvInit();
+    }
+}

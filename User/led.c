@@ -40,7 +40,6 @@ void runLedTwinkle() {
 }
 
 void ledTwinkle() {
-    uprint("led twinkle.\n");
     LED_R_ON;
     msleep(mled_Delay);
     LED_G_ON;

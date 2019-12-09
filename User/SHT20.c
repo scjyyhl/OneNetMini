@@ -68,7 +68,7 @@ char getHumidity() {
         return -1;
     }
     srcValue = (rHumidity[0] << 8) + rHumidity[1];
-    uprintf("get humidity original data is %X", srcValue);
+//    uprintf("get humidity original data is %X", srcValue);
     humidityValue = SHT2x_CalcRH(srcValue);
     
     return 0;

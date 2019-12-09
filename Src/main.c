@@ -30,6 +30,7 @@
 #include "led.h"
 #include "uuart.h"
 #include "SHT20.h"
+#include "ESP8266.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -71,7 +72,7 @@ static void MX_NVIC_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+    uint16_t whileCount = 0;
   /* USER CODE END 1 */
   
 
@@ -101,7 +102,8 @@ int main(void)
   /* Initialize interrupts */
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
-
+    uuart1_RecvInit();
+    sleep(1);
     uprint("system init over.\n");
     sleep(1);
     LED_ON;
@@ -109,21 +111,31 @@ int main(void)
     LED_OFF;
     sleep(1);
     SHT20_reset();
+    uprintln("SHT20 init over.");
+    
+//    ESP8266_Init();
+//    uprintln("ESP8266 init over.");
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+      if (++whileCount > 10000) {
+          whileCount = 0;
+      }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+//      if (whileCount == 5) {
+//          ESP8266_getWiFiList();
+//      }
       ledTwinkle();
-      getValue();
-//      char fbuff[11] = {0};
-//      gcvtf(temperatureValue, 10, fbuff);
-//      uprintf("temperature is %s ", fbuff);
-      uprintf("temperature is %f, humidity is %f%%\n", temperatureValue, humidityValue);
+      
+      if (whileCount % 5 == 0) {
+          getValue();
+          uprintf("temperature is %f, humidity is %f%%\n", temperatureValue, humidityValue);
+      }
   }
   /* USER CODE END 3 */
 }
@@ -182,6 +194,9 @@ static void MX_NVIC_Init(void)
   /* USART1_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(USART1_IRQn, 0, 2);
   HAL_NVIC_EnableIRQ(USART1_IRQn);
+    
+    HAL_NVIC_SetPriority(USART2_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(USART2_IRQn);
 }
 
 /* USER CODE BEGIN 4 */

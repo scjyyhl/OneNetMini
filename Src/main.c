@@ -20,6 +20,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "dma.h"
 #include "i2c.h"
 #include "rtc.h"
 #include "usart.h"
@@ -98,6 +99,7 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   MX_RTC_Init();
+  MX_DMA_Init();
 
   /* Initialize interrupts */
   MX_NVIC_Init();
@@ -113,8 +115,8 @@ int main(void)
     SHT20_reset();
     uprintln("SHT20 init over.");
     
-//    ESP8266_Init();
-//    uprintln("ESP8266 init over.");
+    ESP8266_Init();
+    uprintln("ESP8266 init over.");
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -132,10 +134,10 @@ int main(void)
 //      }
       ledTwinkle();
       
-      if (whileCount % 5 == 0) {
-          getValue();
-          uprintf("temperature is %f, humidity is %f%%\n", temperatureValue, humidityValue);
-      }
+//      if (whileCount % 5 == 0) {
+//          getValue();
+//          uprintf("temperature is %f, humidity is %f%%\n", temperatureValue, humidityValue);
+//      }
   }
   /* USER CODE END 3 */
 }
@@ -194,9 +196,6 @@ static void MX_NVIC_Init(void)
   /* USART1_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(USART1_IRQn, 0, 2);
   HAL_NVIC_EnableIRQ(USART1_IRQn);
-    
-    HAL_NVIC_SetPriority(USART2_IRQn, 0, 0);
-    HAL_NVIC_EnableIRQ(USART2_IRQn);
 }
 
 /* USER CODE BEGIN 4 */

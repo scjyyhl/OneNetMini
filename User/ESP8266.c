@@ -46,8 +46,8 @@ void ESP8266_Init(void) {
     msleep(500);
     
     usart2Callback = ESP8266_DataRecved;
-    ESP8266_DataRecved();
     ESP8266_Clear();
+    ESP8266_DataRecvInit();
     
     uprintln("ESP8266 AT begain.");
     while (ESP8266_SendCmd_D("AT\r\n", "OK")) {
@@ -83,7 +83,7 @@ void ESP8266_getWiFiList(void) {
 //    说明：
 //==========================================================
 void ESP8266_Clear(void) {
-    memset(esp8266_buf, 0, sizeof(esp8266_buf));
+    memset(esp8266_buf, 0, ESP8266BUF_SIZE + 1);
     esp8266_cnt = 0;
 }
 
@@ -131,7 +131,7 @@ char ESP8266_WaitRecive(uint16_t timeout) {
     timeout = timeout / mdelay;
     while (timeout-- > 0) {
         if(esp8266_cnt != 0 && esp8266_cnt == esp8266_cntPre) {     // 如果接收计数不为0，且和上一次的值相同，则说明接收完毕
-            esp8266_cnt = 0;                    // 清0接收计数
+            ESP8266_DataRecvInit();             // 重置数据接收
             return REV_OK;                      // 返回接收完成标志
         }
         esp8266_cntPre = esp8266_cnt;           // 置为相同
@@ -141,29 +141,32 @@ char ESP8266_WaitRecive(uint16_t timeout) {
 }
 
 void ESP8266_DataRecved(void) {
+    if (++esp8266_cnt > ESP8266BUF_SIZE) {
+        esp8266_cnt = 0;
+    }
+    ESP8266_DataRecvInit();
+}
+
+void ESP8266_DataRecvInit(void) {
     HAL_StatusTypeDef status;
-    uint16_t size;
-    uprintln("ESP8266_DataRecved.");
-    if (esp8266CmdType == ESP8266_CMD_CWLAP) {
-        // 处理返回的AP列表
-        esp8266CmdType = ESP8266_CMD_COMMON;
-        size = strlen((const char *)esp8266_buf);
-        if (size > ESP8266BUF_SIZE) {
-            esp8266_buf[ESP8266BUF_SIZE] = '\0';
-        }
-        uprint((const char *)esp8266_buf);
-    }
-    else {
-        esp8266_cnt++;
-    }
-    while (1) {
-        status = HAL_UART_Receive_IT(&huart2, esp8266_buf, ESP8266BUF_SIZE);
+    do {
+        status = HAL_UART_Receive_IT(&huart2, esp8266_buf + esp8266_cnt, 1);
         if (status != HAL_OK) {
             uprintf("HAL_UART_Receive_IT error. status = %d ", status);
             msleep(500);
         }
-        else {
-            break;
+    } while (status == HAL_OK);
+}
+
+void ESP8266_DataRecvReInit(void) {
+    HAL_StatusTypeDef status;
+    do {
+        status = HAL_UART_AbortReceive_IT(&huart2);
+        if (status != HAL_OK) {
+            uprintf("HAL_UART_AbortReceive_IT error. status = %d ", status);
+            msleep(500);
         }
-    }
+    } while (status == HAL_OK);
+    ESP8266_Clear();
+    ESP8266_DataRecvInit();
 }

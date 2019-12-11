@@ -62,7 +62,7 @@ void uprintln(const char *msg) {
 
 void uuart1_RecvInit(void) {
 //    HAL_StatusTypeDef status = HAL_UART_Receive_IT(&huart1, uart1_Buffer, 5);
-    HAL_StatusTypeDef status = HAL_UART_Receive_DMA(&huart1, uart1_Buffer, 5);
+    HAL_StatusTypeDef status = HAL_UART_Receive_DMA(&huart1, uart1_Buffer, 1);
     if (status != HAL_OK) {
         uprintf("HAL_UART_Receive_IT uart1 error. status = %d ", status);
     }
@@ -70,13 +70,9 @@ void uuart1_RecvInit(void) {
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
     if (huart->Instance == USART1) {
-        uprintln("HAL_UART_RxCpltCallback USART1");
-        uprintln((const char *)uart1_Buffer);
-        memset(uart1_Buffer, 0, U1_BUF_SIZE + 1);
-        uuart1_RecvInit();
+        HAL_UART_Transmit(&huart1, uart1_Buffer, 1, 10);
     }
     else if (huart->Instance == USART2) {
-        uprintln("HAL_UART_RxCpltCallback USART2");
         if (usart2Callback) {
             usart2Callback();
         }
@@ -89,8 +85,5 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
     if (huart->Instance == USART1) {
         uprintln("HAL_UART_ErrorCallback USART1");
-        __HAL_UART_RESET_HANDLE_STATE(huart);
-        WRITE_REG(huart->Instance->SR, 0);
-        uuart1_RecvInit();
     }
 }

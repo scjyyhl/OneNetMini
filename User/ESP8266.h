@@ -23,5 +23,7 @@ char ESP8266_SendCmd(char *cmd, char *res, uint16_t timeout);
 
 char ESP8266_WaitRecive(uint16_t timeout);
 void ESP8266_DataRecved(void);
+void ESP8266_DataRecvInit(void);
+void ESP8266_DataRecvReInit(void);
 
 #endif /* ESP8266_h */

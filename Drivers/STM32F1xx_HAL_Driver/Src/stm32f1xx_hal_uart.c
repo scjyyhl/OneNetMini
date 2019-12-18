@@ -2028,7 +2028,6 @@ void HAL_UART_IRQHandler(UART_HandleTypeDef *huart)
 
   /* If no error occurs */
   errorflags = (isrflags & (uint32_t)(USART_SR_PE | USART_SR_FE | USART_SR_ORE | USART_SR_NE));
-//    errorflags = (isrflags & (uint32_t)(USART_SR_PE | USART_SR_FE |                USART_SR_NE));
   if (errorflags == RESET)
   {
     /* UART in mode Receiver -------------------------------------------------*/
@@ -2038,7 +2037,6 @@ void HAL_UART_IRQHandler(UART_HandleTypeDef *huart)
       return;
     }
   }
-//    uprintf("HAL_UART_IRQHandler errorflags = %d", errorflags);
 
   /* If some errors occur */
   if ((errorflags != RESET) && (((cr3its & USART_CR3_EIE) != RESET) || ((cr1its & (USART_CR1_RXNEIE | USART_CR1_PEIE)) != RESET)))

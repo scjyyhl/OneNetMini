@@ -19,13 +19,16 @@
 
 #define ESP8266BUF_SIZE 511
 unsigned char esp8266_buf[ESP8266BUF_SIZE + 1];
-unsigned short esp8266_cnt = 0, esp8266_cntPre = 0;
+volatile unsigned short esp8266_cnt = 0, esp8266_cntPre = 0;
 typedef enum
 {
     ESP8266_CMD_COMMON      = 0x00,
     ESP8266_CMD_CWLAP       = 0x01
 } ESP8266_CMD_Type;
 ESP8266_CMD_Type esp8266CmdType = ESP8266_CMD_COMMON;
+uint16_t currentBufferSize = ESP8266BUF_SIZE;
+
+char **wifiList;
 
 /**
  * 初始化esp8266芯片
@@ -46,10 +49,8 @@ void ESP8266_Init(void) {
     msleep(500);
     
     usart2Callback = ESP8266_DataRecved;
-    ESP8266_Clear();
     ESP8266_DataRecvInit();
     
-    uprintln("ESP8266 AT begain.");
     while (ESP8266_SendCmd_D("AT\r\n", "OK")) {
         uprintln("ESP8266 AT CMD NOT OK.");
         msleep(500);
@@ -60,6 +61,17 @@ void ESP8266_Init(void) {
         msleep(500);
     }
     uprintln("esp8266 set work mode is Station mode.");
+    
+    while (ESP8266_SendCmd_D(WIFI_INFO, "GOT IP")) {
+        sleep(1);
+        uprintln("connect faild. try again.");
+    }
+    
+    while (ESP8266_SendCmd_D("AT+CIFSR\r\n", "OK")) {
+        sleep(1);
+    }
+    sleep(3);
+    uprintln((const char *)esp8266_buf);
 }
 
 /**
@@ -68,7 +80,15 @@ void ESP8266_Init(void) {
 void ESP8266_getWiFiList(void) {
     const char *cmd = "AT+CWLAP\r\n";
     esp8266CmdType = ESP8266_CMD_CWLAP;
-    HAL_UART_Transmit(&huart1, (uint8_t*)cmd, strlen(cmd), 1000);
+    ESP8266_SendCmd_NOACK((char*)cmd);
+}
+
+void printBuffer(void) {
+    uprint((char*)esp8266_buf);
+}
+
+void doWiFiInfoData(void) {
+    
 }
 
 //==========================================================
@@ -101,64 +121,51 @@ void ESP8266_Clear(void) {
 //    说明：
 //==========================================================
 char ESP8266_SendCmd(char *cmd, char *res, uint16_t timeout) {
-    HAL_StatusTypeDef status = HAL_UART_Transmit(&huart2, (uint8_t*)cmd, strlen(cmd), 1000);
+    HAL_StatusTypeDef status;
+    ESP8266_DataRecvReInit();
+    status = HAL_UART_Transmit(&huart2, (uint8_t*)cmd, strlen(cmd), 1000);
     if (status != HAL_OK) {
         uprintf("ESP8266_SendCmd error, status = %d ", status);
     }
-    if(ESP8266_WaitRecive(timeout) == REV_OK) {                      // 如果收到数据
+    if (res == NULL) {
+        return 0;
+    }
+    while(timeout > 0) {                      // 如果收到数据
+        uprintln((const char *)esp8266_buf);
         if(strstr((const char *)esp8266_buf, res) != NULL) {  // 如果检索到关键词
-            ESP8266_Clear();                                  // 清空缓存
             return 0;
         }
+        msleep(10);
+        timeout -= 10;
     }
+    
     return 1;
 }
 
-//==========================================================
-//    函数名称：    ESP8266_WaitRecive
-//
-//    函数功能：    等待接收完成
-//
-//    入口参数：    timeout 等待超时时间 ms
-//
-//    返回参数：    REV_OK-接收完成        REV_WAIT-接收超时未完成
-//
-//    说明：        循环调用检测是否接收完成
-//==========================================================
-char ESP8266_WaitRecive(uint16_t timeout) {
-    uint16_t mdelay = 10;
-    
-    timeout = timeout / mdelay;
-    while (timeout-- > 0) {
-        if(esp8266_cnt != 0 && esp8266_cnt == esp8266_cntPre) {     // 如果接收计数不为0，且和上一次的值相同，则说明接收完毕
-            ESP8266_DataRecvInit();             // 重置数据接收
-            return REV_OK;                      // 返回接收完成标志
-        }
-        esp8266_cntPre = esp8266_cnt;           // 置为相同
-        msleep(mdelay);
-    }
-    return REV_TIMEOUT;
-}
-
 void ESP8266_DataRecved(void) {
-    if (++esp8266_cnt > ESP8266BUF_SIZE) {
-        esp8266_cnt = 0;
-    }
+    uprintln("ESP8266_DataRecved");
+    uprintln((const char *)esp8266_buf);
     ESP8266_DataRecvInit();
 }
 
-void ESP8266_DataRecvInit(void) {
+void ESP8266_DataRecvInit_Buf(uint8_t *buf, uint16_t bufLen) {
     HAL_StatusTypeDef status;
+    currentBufferSize = bufLen;
+    ESP8266_Clear();
     do {
-        status = HAL_UART_Receive_IT(&huart2, esp8266_buf + esp8266_cnt, 1);
+        status = HAL_UART_Receive_IT(&huart2, buf, bufLen);
         if (status != HAL_OK) {
             uprintf("HAL_UART_Receive_IT error. status = %d ", status);
             msleep(500);
         }
-    } while (status == HAL_OK);
+    } while (status != HAL_OK);
 }
 
-void ESP8266_DataRecvReInit(void) {
+void ESP8266_DataRecvInit(void) {
+    ESP8266_DataRecvInit_Buf(esp8266_buf, ESP8266BUF_SIZE);
+}
+
+void ESP8266_DataRecvReInit_Buf(uint8_t *buf, uint16_t bufLen) {
     HAL_StatusTypeDef status;
     do {
         status = HAL_UART_AbortReceive_IT(&huart2);
@@ -166,7 +173,33 @@ void ESP8266_DataRecvReInit(void) {
             uprintf("HAL_UART_AbortReceive_IT error. status = %d ", status);
             msleep(500);
         }
-    } while (status == HAL_OK);
-    ESP8266_Clear();
-    ESP8266_DataRecvInit();
+    } while (status != HAL_OK);
+    ESP8266_DataRecvInit_Buf(buf, bufLen);
+}
+
+void ESP8266_DataRecvReInit(void) {
+    ESP8266_DataRecvReInit_Buf(esp8266_buf, ESP8266BUF_SIZE);
+}
+
+void ESP8266_TcpConnect(const char *ip, uint16_t port) {
+    char tempCmd[54];
+    sprintf(tempCmd, "AT+CIPSTART=\"TCP\",\"%s\",%d\r\n", ip, port);
+    while(ESP8266_SendCmd_D(tempCmd, "CONNECT") == 1) {
+        msleep(500);
+    }
+}
+
+void ESP8266_SendData(uint8_t *data, uint16_t len) {
+    char cmdBuf[32];
+    sprintf(cmdBuf, "AT+CIPSEND=%d\r\n", len);
+    while(ESP8266_SendCmd_D(cmdBuf, ">")) {
+        sleep(1);
+    }
+    HAL_UART_Transmit(&huart2, data, len, 10 * len);
+}
+
+void ESP8266_doHttpRequest(const char *ip, uint16_t port, const char *requestData, uint16_t requestDataLen, char *responseData, uint16_t responseLen) {
+    ESP8266_TcpConnect(ip, port);
+    ESP8266_DataRecvReInit_Buf((uint8_t*)responseData, responseLen);
+    ESP8266_SendData((uint8_t*)requestData, requestDataLen);
 }

@@ -24,7 +24,7 @@
 USART_RecvCallback usart1Callback;
 USART_RecvCallback usart2Callback;
 
-#define U1_BUF_SIZE   64
+#define U1_BUF_SIZE   7
 unsigned char uart1_Buffer[U1_BUF_SIZE + 1];
 
 void uprintf(const char *fmt,...) {
@@ -66,6 +66,7 @@ void uuart1_RecvInit(void) {
     if (status != HAL_OK) {
         uprintf("HAL_UART_Receive_IT uart1 error. status = %d ", status);
     }
+    
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {

@@ -32,6 +32,7 @@
 #include "uuart.h"
 #include "SHT20.h"
 #include "ESP8266.h"
+#include "OneNet.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -121,23 +122,39 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+    uint8_t status = 1;
   while (1)
   {
-      if (++whileCount > 10000) {
+      if (++whileCount > 300) {
           whileCount = 0;
       }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-//      if (whileCount == 5) {
-//          ESP8266_getWiFiList();
-//      }
       ledTwinkle();
+      msleep(100);
       
-//      if (whileCount % 5 == 0) {
-//          getValue();
-//          uprintf("temperature is %f, humidity is %f%%\n", temperatureValue, humidityValue);
-//      }
+      if (status == 0) {
+          if (whileCount % 150 == 0) {
+              status = 1;
+          }
+      }
+      else if (status == 1) {
+          status = 2;
+          whileCount = 0;
+          getValue();
+          uprintf("temperature is %.2f, humidity is %.2f%%\n", temperatureValue, humidityValue);
+      }
+      else if (status == 2) {
+          status = 3;
+          reportSHTDataPoint(temperatureValue, humidityValue);
+      }
+      else if (status == 3) {
+          if ((checkReportDataPointResponse() == 0) || whileCount == 300) {
+              status = 0;
+              whileCount = 0;
+          }
+      }
   }
   /* USER CODE END 3 */
 }

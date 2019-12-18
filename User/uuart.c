@@ -58,6 +58,7 @@ void uprintln(const char *msg) {
     memcpy(data, msg, size);
     data[size++] = '\n';
     HAL_UART_Transmit(&huart1, data, size, 100);
+    free(data);
 }
 
 void uuart1_RecvInit(void) {

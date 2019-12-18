@@ -31,6 +31,7 @@ void uprint(const char *msg);
 
 /**
  * 通过串口输出，末尾会自动加换行
+ * @return 返回通过串口输出的字符串长度
  */
 void uprintln(const char *msg);
 

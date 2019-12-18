@@ -13,12 +13,18 @@
 #include <string.h>
 #include <stdlib.h>
 
+#define RESPONSE_BUFFER_SIZE    256
 char *responseBuffer = NULL;
+uint16_t RecvBufferCount = 0;
 
 int8_t checkReportDataPointResponse(void) {
-    uprint((const char *)responseBuffer);
-    if (strstr(responseBuffer, "succ") != NULL) {
-        return 0;
+    uint16_t size = strlen((const char *)responseBuffer);
+    if (size != RecvBufferCount) {
+        RecvBufferCount = size;
+        uprintln((const char *)responseBuffer);
+        if (strstr(responseBuffer, "succ") != NULL) {
+            return 0;
+        }
     }
     return 1;
 }
@@ -26,12 +32,12 @@ int8_t checkReportDataPointResponse(void) {
 void reportDataPoint(const char *bodyData) {
     char *requestData;
     uint16_t size = createRequestData(ONENET_API_URL_DATAPOINTS, "POST", bodyData, ONENET_HTTP_HEADER_PARAM, &requestData);
-    if (responseBuffer != NULL) {
-        free(responseBuffer);
+    if (responseBuffer == NULL) {
+        responseBuffer = malloc(RESPONSE_BUFFER_SIZE);
     }
-    responseBuffer = malloc(64);
-    memset(responseBuffer, 0, 64);
-    ESP8266_doHttpRequest(ONENET_API_IP, ONENET_API_PORT, requestData, size, responseBuffer, 63);
+    memset(responseBuffer, 0, RESPONSE_BUFFER_SIZE);
+    RecvBufferCount = 0;
+    ESP8266_doHttpRequest(ONENET_API_IP, ONENET_API_PORT, requestData, size, responseBuffer, RESPONSE_BUFFER_SIZE - 1);
     free(requestData);
 }
 

@@ -19,7 +19,6 @@
 
 #define ESP8266BUF_SIZE 511
 unsigned char esp8266_buf[ESP8266BUF_SIZE + 1];
-volatile unsigned short esp8266_cnt = 0, esp8266_cntPre = 0;
 typedef enum
 {
     ESP8266_CMD_COMMON      = 0x00,
@@ -63,14 +62,14 @@ void ESP8266_Init(void) {
     uprintln("esp8266 set work mode is Station mode.");
     
     while (ESP8266_SendCmd_D(WIFI_INFO, "GOT IP")) {
-        sleep(1);
+        msleep(500);
         uprintln("connect faild. try again.");
     }
     
     while (ESP8266_SendCmd_D("AT+CIFSR\r\n", "OK")) {
-        sleep(1);
+        msleep(500);
     }
-    sleep(3);
+    sleep(1);
     uprintln((const char *)esp8266_buf);
 }
 
@@ -104,7 +103,6 @@ void doWiFiInfoData(void) {
 //==========================================================
 void ESP8266_Clear(void) {
     memset(esp8266_buf, 0, ESP8266BUF_SIZE + 1);
-    esp8266_cnt = 0;
 }
 
 //==========================================================
@@ -131,27 +129,25 @@ char ESP8266_SendCmd(char *cmd, char *res, uint16_t timeout) {
         return 0;
     }
     while(timeout > 0) {                      // 如果收到数据
-        uprintln((const char *)esp8266_buf);
         if(strstr((const char *)esp8266_buf, res) != NULL) {  // 如果检索到关键词
+            uprintln((const char *)esp8266_buf);
             return 0;
         }
         msleep(10);
         timeout -= 10;
     }
-    
+    uprintln((const char *)esp8266_buf);
     return 1;
 }
 
 void ESP8266_DataRecved(void) {
     uprintln("ESP8266_DataRecved");
-    uprintln((const char *)esp8266_buf);
     ESP8266_DataRecvInit();
 }
 
 void ESP8266_DataRecvInit_Buf(uint8_t *buf, uint16_t bufLen) {
     HAL_StatusTypeDef status;
     currentBufferSize = bufLen;
-    ESP8266_Clear();
     do {
         status = HAL_UART_Receive_IT(&huart2, buf, bufLen);
         if (status != HAL_OK) {
@@ -162,6 +158,7 @@ void ESP8266_DataRecvInit_Buf(uint8_t *buf, uint16_t bufLen) {
 }
 
 void ESP8266_DataRecvInit(void) {
+    ESP8266_Clear();
     ESP8266_DataRecvInit_Buf(esp8266_buf, ESP8266BUF_SIZE);
 }
 
@@ -174,10 +171,12 @@ void ESP8266_DataRecvReInit_Buf(uint8_t *buf, uint16_t bufLen) {
             msleep(500);
         }
     } while (status != HAL_OK);
+    msleep(10);
     ESP8266_DataRecvInit_Buf(buf, bufLen);
 }
 
 void ESP8266_DataRecvReInit(void) {
+    ESP8266_Clear();
     ESP8266_DataRecvReInit_Buf(esp8266_buf, ESP8266BUF_SIZE);
 }
 
@@ -200,6 +199,7 @@ void ESP8266_SendData(uint8_t *data, uint16_t len) {
 
 void ESP8266_doHttpRequest(const char *ip, uint16_t port, const char *requestData, uint16_t requestDataLen, char *responseData, uint16_t responseLen) {
     ESP8266_TcpConnect(ip, port);
-    ESP8266_DataRecvReInit_Buf((uint8_t*)responseData, responseLen);
     ESP8266_SendData((uint8_t*)requestData, requestDataLen);
+    ESP8266_DataRecvReInit_Buf((uint8_t*)responseData, responseLen);
+    uprintln(requestData);
 }

@@ -87,4 +87,12 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
     if (huart->Instance == USART1) {
         uprintln("HAL_UART_ErrorCallback USART1");
     }
+    else if (huart->Instance == USART2) {
+        uprintln("HAL_UART_ErrorCallback USART2");
+    }
+//    if ((huart->ErrorCode & HAL_UART_ERROR_ORE) != RESET) {
+//        uprintln("__HAL_UART_CLEAR_FLAG UART_FLAG_ORE");
+//        __HAL_UART_CLEAR_FLAG(huart, UART_FLAG_ORE);
+//    }
+    HAL_UART_Receive_IT(huart, huart->pRxBuffPtr, huart->RxXferSize);
 }

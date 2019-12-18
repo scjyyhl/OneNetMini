@@ -25,7 +25,7 @@ void ESP8266_getWiFiList(void);
 void ESP8266_Clear(void);
 
 char ESP8266_SendCmd(char *cmd, char *res, uint16_t timeout);
-#define ESP8266_SendCmd_D(cmd, res)   ESP8266_SendCmd(cmd, res, 2000)
+#define ESP8266_SendCmd_D(cmd, res)   ESP8266_SendCmd(cmd, res, 3000)
 #define ESP8266_SendCmd_NOACK(cmd)    ESP8266_SendCmd(cmd, NULL, 0)
 
 void ESP8266_DataRecved(void);

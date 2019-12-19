@@ -125,7 +125,7 @@ int main(void)
     uint8_t status = 1;
   while (1)
   {
-      if (++whileCount > 300) {
+      if (++whileCount > 600) {
           whileCount = 0;
       }
     /* USER CODE END WHILE */
@@ -135,7 +135,7 @@ int main(void)
       msleep(100);
       
       if (status == 0) {
-          if (whileCount % 150 == 0) {
+          if (whileCount % 600 == 0) {
               status = 1;
           }
       }

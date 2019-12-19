@@ -14,8 +14,10 @@
 #define REV_OK            0    // 接收完成标志
 #define REV_TIMEOUT       1    // 接收未完成标志
 
-#define SSID        "WLJS_MY_00"
-#define PASSWORD    "wlmyxfd666"
+//#define SSID        "WLJS_MY_00"
+//#define PASSWORD    "wlmyxfd666"
+#define SSID        "TP-LINK_dy"
+#define PASSWORD    "0926445350"
 #define WIFI_INFO   "AT+CWJAP=\""SSID"\",\""PASSWORD"\"\r\n"
 
 extern volatile unsigned short esp8266_cnt;

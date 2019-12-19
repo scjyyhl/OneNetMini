@@ -109,9 +109,9 @@ int main(void)
     sleep(1);
     uprint("system init over.\n");
     sleep(1);
-    LED_ON;
+    LED_ALL_ON;
     sleep(1.1);
-    LED_OFF;
+    LED_ALL_OFF;
     sleep(1);
     SHT20_reset();
     uprintln("SHT20 init over.");
@@ -131,7 +131,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-      ledTwinkle();
+      ledMainWork();
       msleep(100);
       
       if (status == 0) {

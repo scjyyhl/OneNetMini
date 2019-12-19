@@ -11,6 +11,7 @@
 #include "macro.h"
 #include "usart.h"
 #include "uuart.h"
+#include "led.h"
 #include "stm32f103xb.h"
 #include "stm32f1xx_hal_rcc.h"
 #include "stm32f1xx_hal_gpio.h"
@@ -43,33 +44,33 @@ void ESP8266_Init(void) {
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
     
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_RESET);
-    msleep(250);
+    sleepForWifi(3);
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
-    msleep(500);
+    sleepForWifi(5);
     
     usart2Callback = ESP8266_DataRecved;
     ESP8266_DataRecvInit();
     
     while (ESP8266_SendCmd_D("AT\r\n", "OK")) {
         uprintln("ESP8266 AT CMD NOT OK.");
-        msleep(500);
+        sleepForWifi(5);
     }
     uprintln("esp8266 AT.");
     
     while (ESP8266_SendCmd_D("AT+CWMODE=1\r\n", "OK")) {
-        msleep(500);
+        sleepForWifi(5);
     }
     uprintln("esp8266 set work mode is Station mode.");
     
     while (ESP8266_SendCmd_D(WIFI_INFO, "GOT IP")) {
-        msleep(500);
+        sleepForWifi(5);
         uprintln("connect faild. try again.");
     }
     
     while (ESP8266_SendCmd_D("AT+CIFSR\r\n", "OK")) {
-        msleep(500);
+        sleepForWifi(5);
     }
-    sleep(1);
+    sleepForWifi(11);
     uprintln((const char *)esp8266_buf);
 }
 
@@ -152,7 +153,7 @@ void ESP8266_DataRecvInit_Buf(uint8_t *buf, uint16_t bufLen) {
         status = HAL_UART_Receive_IT(&huart2, buf, bufLen);
         if (status != HAL_OK) {
             uprintf("HAL_UART_Receive_IT error. status = %d ", status);
-            msleep(500);
+            sleepForWifi(5);
         }
     } while (status != HAL_OK);
 }
@@ -168,7 +169,7 @@ void ESP8266_DataRecvReInit_Buf(uint8_t *buf, uint16_t bufLen) {
         status = HAL_UART_AbortReceive_IT(&huart2);
         if (status != HAL_OK) {
             uprintf("HAL_UART_AbortReceive_IT error. status = %d ", status);
-            msleep(500);
+            sleepForWifi(5);
         }
     } while (status != HAL_OK);
     msleep(10);
@@ -184,7 +185,7 @@ void ESP8266_TcpConnect(const char *ip, uint16_t port) {
     char tempCmd[54];
     sprintf(tempCmd, "AT+CIPSTART=\"TCP\",\"%s\",%d\r\n", ip, port);
     while(ESP8266_SendCmd_D(tempCmd, "CONNECT") == 1) {
-        msleep(500);
+        sleepForWifi(5);
     }
 }
 
@@ -192,7 +193,7 @@ void ESP8266_SendData(uint8_t *data, uint16_t len) {
     char cmdBuf[32];
     sprintf(cmdBuf, "AT+CIPSEND=%d\r\n", len);
     while(ESP8266_SendCmd_D(cmdBuf, ">")) {
-        sleep(1);
+        sleepForWifi(11);
     }
     HAL_UART_Transmit(&huart2, data, len, 10 * len);
 }

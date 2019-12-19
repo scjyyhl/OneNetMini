@@ -21,7 +21,16 @@ GPIO_PinState LedOn = GPIO_PIN_RESET;
 
 #define LED_CONTROL(pos, on)    HAL_GPIO_WritePin(GPIOB, pos, on)
 
-void runLedTwinkle() {
+#define LED_ON      GPIO_PIN_RESET
+#define LED_OFF     GPIO_PIN_SET
+
+#define WORK_LED    Led_Green_Pin
+GPIO_PinState workLedState = LED_OFF;
+
+#define WIFI_LED    Led_Yellow_Pin
+GPIO_PinState wifiLedState = LED_OFF;
+
+void runLedTwinkle(void) {
   while (1)
   {
     uprint("led twinkle.\n");
@@ -44,11 +53,32 @@ void runLedTwinkle() {
   }
 }
 
-void ledTwinkle() {
+void ledTwinkle(void) {
     if (LedPos > GPIO_PIN_9) {
         LedPos = GPIO_PIN_6;
         LedOn = LedOn == GPIO_PIN_RESET ? GPIO_PIN_SET : GPIO_PIN_RESET;
     }
     LED_CONTROL(LedPos, LedOn);
     LedPos = LedPos << 1;
+}
+
+void ledMainWork(void) {
+    LED_CONTROL(WORK_LED, workLedState);
+    workLedState = workLedState == LED_OFF ? LED_ON : LED_OFF;
+}
+
+void ledWifiWork(void) {
+    LED_CONTROL(WIFI_LED, wifiLedState);
+    wifiLedState = wifiLedState == LED_OFF ? LED_ON : LED_OFF;
+}
+
+void sleepForWifi(int16_t util) {
+    wifiLedState = LED_ON;
+    while (--util < 0) {
+        ledWifiWork();
+        ledMainWork();
+        msleep(100);
+    }
+    LED_CONTROL(WIFI_LED, LED_OFF);
+    ledMainWork();
 }

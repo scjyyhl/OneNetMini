@@ -122,10 +122,12 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+#define WHILE_MAX   1200
+#define SHT_REPORT_TIMINTERVAL  1200
     uint8_t status = 1;
   while (1)
   {
-      if (++whileCount > 600) {
+      if (++whileCount > WHILE_MAX) {
           whileCount = 0;
       }
     /* USER CODE END WHILE */
@@ -135,7 +137,7 @@ int main(void)
       msleep(100);
       
       if (status == 0) {
-          if (whileCount % 600 == 0) {
+          if (whileCount % SHT_REPORT_TIMINTERVAL == 0) {
               status = 1;
           }
       }

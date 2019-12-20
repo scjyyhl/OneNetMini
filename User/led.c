@@ -13,6 +13,7 @@
 
 #include "led.h"
 #include "uuart.h"
+#include <stdlib.h>
 
 #define mled_Delay    100
 
@@ -25,7 +26,7 @@ GPIO_PinState LedOn = GPIO_PIN_RESET;
 #define LED_OFF     GPIO_PIN_SET
 
 #define WORK_LED    Led_Green_Pin
-GPIO_PinState workLedState = LED_OFF;
+uint16_t workLedState = 0x1FE;
 
 #define WIFI_LED    Led_Yellow_Pin
 GPIO_PinState wifiLedState = LED_OFF;
@@ -63,8 +64,8 @@ void ledTwinkle(void) {
 }
 
 void ledMainWork(void) {
-    LED_CONTROL(WORK_LED, workLedState);
-    workLedState = workLedState == LED_OFF ? LED_ON : LED_OFF;
+    LED_CONTROL(WORK_LED, workLedState & 0x1);
+    workLedState = ((workLedState >> 1) | workLedState << 15);
 }
 
 void ledWifiWork(void) {

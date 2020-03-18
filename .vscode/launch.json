@@ -4,15 +4,7 @@
   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
-    {
-      "cwd": "${workspaceRoot}",
-      "executable": "./build/OneNetMini.bin",
-      "name": "st-flash",
-      "request": "launch",
-      "type": "cortex-debug",
-      "servertype": "stutil",
-      "device": "STM32F103CBTx"
-    },
+
     {
       "name": "Cortex Debug",
       "cwd": "${workspaceRoot}",
@@ -20,7 +12,13 @@
       "request": "launch",
       "type": "cortex-debug",
       "servertype": "stutil",
-      "device": "STM32F103CBTx"
+      "device": "STM32F103CB",
+      "armToolchainPath": "/Users/ch-yanghl/.vscode/extensions/metalcode-eu.darwin-arm-none-eabi-0.1.9/bin",
+      "preLaunchTask": "build",
+      // "postLaunchCommands": [
+      //   "file ./build/OneNetMini.bin",
+      //   "load"
+      // ]
     }
   ]
 }
